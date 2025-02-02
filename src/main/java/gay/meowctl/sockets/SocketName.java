@@ -36,7 +36,7 @@ public class SocketName {
         // pid (1~32bit) + counter (24bit) + random (8bit)
         long streamId = pid << 32 | (long) shortIdCounter << 8 | RNG.nextLong(1<<8);
 
-        if (++shortIdCounter >= 1<<20) {
+        if (++shortIdCounter >= 1<<24) {
             shortIdCounter = 0;
         }
 
