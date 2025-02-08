@@ -26,10 +26,14 @@ public class SocketName {
 
     public String nextName() {
         return switch (option) {
-            case RANDOM -> RNG.nextBoolean() ? nextShortName() : nextLongName();
+            case RANDOM -> nextRandomName();
             case SHORT -> nextShortName();
             case LONG -> nextLongName();
         };
+    }
+
+    public String nextRandomName() {
+        return RNG.nextBoolean() ? nextShortName() : nextLongName();
     }
 
     public synchronized String nextShortName() {
