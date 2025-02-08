@@ -14,8 +14,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 
 public class SocketDemo {
     private final SocketName socketName;
@@ -30,15 +28,11 @@ public class SocketDemo {
         boolean isUnix = false;
         SocketName.Option sockNameOption = SocketName.Option.RANDOM;
 
-        if (args.length >= 1) {
-            List<String> argsList = Arrays.asList(args);
-
-            isUnix = argsList.contains("--unix");
-
-            if (argsList.contains("--short")) {
-                sockNameOption = SocketName.Option.SHORT;
-            } else if (argsList.contains("--long")) {
-                sockNameOption = SocketName.Option.LONG;
+        for (String arg : args) {
+            switch (arg) {
+                case "--unix" -> isUnix = true;
+                case "--short" -> sockNameOption = SocketName.Option.SHORT;
+                case "--long" -> sockNameOption = SocketName.Option.LONG;
             }
         }
 
