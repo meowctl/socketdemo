@@ -1,71 +1,31 @@
 package gay.meowctl.sockets;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
 
 public class SocketName {
-    public enum Option {
-        RANDOM, SHORT, LONG
-    }
-
+    private static final String PREFIX = "gb-";
+    private static final String CHARS = "0123456789-_qwertyuiopasdfghjklzxcvbnm";
     private static final SecureRandom RNG = new SecureRandom();
 
-    private final Option option;
-    private final long pid;
-    private int shortIdCounter = 0;
-    private long longIdCounter = 0;
+    public static String nextName(int randomChars) {
+        var sb = new StringBuilder(PREFIX.length() + randomChars);
 
-    public SocketName() {
-        this(Option.RANDOM);
-    }
+        sb.append(PREFIX);
+        for (int i = 0; i < randomChars; i++) {
+            int chIndex = RNG.nextInt(CHARS.length());
+            char ch = CHARS.charAt(chIndex);
 
-    public SocketName(Option option) {
-        this.option = option;
-        this.pid = getpid();
-    }
+            // if chosen character is a letter, decide if it should be uppercase or not
+            if (chIndex >= 12 && RNG.nextBoolean()) {
+                ch = Character.toUpperCase(ch);
+            }
 
-    public String nextName() {
-        return switch (option) {
-            case RANDOM -> nextRandomName();
-            case SHORT -> nextShortName();
-            case LONG -> nextLongName();
-        };
-    }
-
-    public String nextRandomName() {
-        return RNG.nextBoolean() ? nextShortName() : nextLongName();
-    }
-
-    public synchronized String nextShortName() {
-        // pid (1~32bit) + counter (24bit) + random (8bit)
-        long streamId = pid << 32 | (long) shortIdCounter << 8 | RNG.nextLong(1<<8);
-
-        if (++shortIdCounter >= 1<<24) {
-            shortIdCounter = 0;
+            sb.append(ch);
         }
-
-        return "gb-" + Long.toUnsignedString(streamId, 36);
+        return sb.toString();
     }
 
-    public synchronized String nextLongName() {
-        // pid (1~32bit) + counter (63bit) + random (32bit)
-        BigInteger streamId = BigInteger
-                .valueOf(pid)
-                .shiftLeft(63)
-                .or(BigInteger.valueOf(longIdCounter))
-                .shiftLeft(32)
-                .or(BigInteger.valueOf(RNG.nextLong(1L<<32)));
-
-        if (longIdCounter++ == Long.MAX_VALUE) {
-            longIdCounter = 0;
-        }
-
-        return "gb-" + streamId.toString(36);
-    }
-
-    private long getpid() {
-        long pid = ProcessHandle.current().pid() & 0xffffffffL;
-
-        return pid != 0 ? pid : RNG.nextLong(1, 1L<<32);
+    public static String nextUniqueName() {
+        return nextName(11);
     }
 }

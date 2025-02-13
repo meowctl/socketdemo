@@ -16,34 +16,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SocketDemo {
-    private final SocketName socketName;
-
-    public SocketDemo(SocketName sockName) {
-        this.socketName = sockName;
-    }
-
     public static void main(String[] args) throws IOException {
         setShutdownHook();
 
         boolean isUnix = false;
-        SocketName.Option sockNameOption = SocketName.Option.RANDOM;
 
         for (String arg : args) {
             switch (arg) {
                 case "--unix" -> isUnix = true;
-                case "--short" -> sockNameOption = SocketName.Option.SHORT;
-                case "--long" -> sockNameOption = SocketName.Option.LONG;
             }
         }
-
-        var socketDemo = new SocketDemo(new SocketName(sockNameOption));
 
         while (true) {
             try {
                 if (isUnix) {
-                    socketDemo.printUnixSocket();
+                    printUnixSocket();
                 } else {
-                    socketDemo.printTcpSocket();
+                    printTcpSocket();
                 }
             } catch (ClosedByInterruptException e) {
                 break;
@@ -71,7 +60,7 @@ public class SocketDemo {
         }));
     }
 
-    public void printTcpSocket() throws IOException {
+    public static void printTcpSocket() throws IOException {
         var address = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0);
 
         try (var socket = ServerSocketChannel.open(StandardProtocolFamily.INET).bind(address)) {
@@ -79,9 +68,9 @@ public class SocketDemo {
         }
     }
 
-    public void printUnixSocket() throws IOException {
+    public static void printUnixSocket() throws IOException {
         var address = UnixDomainSocketAddress.of(
-                Path.of(System.getProperty("java.io.tmpdir"), socketName.nextName()));
+                Path.of(System.getProperty("java.io.tmpdir"), SocketName.nextUniqueName()));
 
         try (var socket = ServerSocketChannel.open(StandardProtocolFamily.UNIX).bind(address)) {
             printSocket(socket);
@@ -90,7 +79,7 @@ public class SocketDemo {
         }
     }
 
-    public void printSocket(ServerSocketChannel socket) throws IOException {
+    public static void printSocket(ServerSocketChannel socket) throws IOException {
         System.out.println(socket.getLocalAddress());
 
         try (SocketChannel conn = socket.accept();
