@@ -24,6 +24,6 @@ public class SocketName {
     }
 
     public long pidOrRandom() {
-        return pid != 0 ? pid : RNG.nextLong();
+        return pid != 0 ? pid : RNG.nextLong(1, Long.MAX_VALUE);
     }
 }
