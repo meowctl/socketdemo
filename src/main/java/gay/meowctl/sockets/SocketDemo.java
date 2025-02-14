@@ -16,6 +16,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SocketDemo {
+    private final SocketName socketName;
+
+    public SocketDemo(SocketName socketName) {
+        this.socketName = socketName;
+    }
+
     public static void main(String[] args) throws IOException {
         setShutdownHook();
 
@@ -27,12 +33,14 @@ public class SocketDemo {
             }
         }
 
+        var socketDemo = new SocketDemo(new SocketName());
+
         while (true) {
             try {
                 if (isUnix) {
-                    printUnixSocket();
+                    socketDemo.printUnixSocket();
                 } else {
-                    printTcpSocket();
+                    socketDemo.printTcpSocket();
                 }
             } catch (ClosedByInterruptException e) {
                 break;
@@ -60,7 +68,7 @@ public class SocketDemo {
         }));
     }
 
-    public static void printTcpSocket() throws IOException {
+    public void printTcpSocket() throws IOException {
         var address = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0);
 
         try (var socket = ServerSocketChannel.open(StandardProtocolFamily.INET).bind(address)) {
@@ -68,9 +76,9 @@ public class SocketDemo {
         }
     }
 
-    public static void printUnixSocket() throws IOException {
+    public void printUnixSocket() throws IOException {
         var address = UnixDomainSocketAddress.of(
-                Path.of(System.getProperty("java.io.tmpdir"), SocketName.nextUniqueName()));
+                Path.of(System.getProperty("java.io.tmpdir"), socketName.nextName()));
 
         try (var socket = ServerSocketChannel.open(StandardProtocolFamily.UNIX).bind(address)) {
             printSocket(socket);
@@ -79,7 +87,7 @@ public class SocketDemo {
         }
     }
 
-    public static void printSocket(ServerSocketChannel socket) throws IOException {
+    public void printSocket(ServerSocketChannel socket) throws IOException {
         System.out.println(socket.getLocalAddress());
 
         try (SocketChannel conn = socket.accept();

@@ -1,31 +1,29 @@
 package gay.meowctl.sockets;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SocketName {
     private static final String PREFIX = "gb-";
-    private static final String CHARS = "0123456789-_qwertyuiopasdfghjklzxcvbnm";
     private static final SecureRandom RNG = new SecureRandom();
 
-    public static String nextName(int randomChars) {
-        var sb = new StringBuilder(PREFIX.length() + randomChars);
+    private final long pid = ProcessHandle.current().pid();
+    private final AtomicInteger counter = new AtomicInteger();
 
-        sb.append(PREFIX);
-        for (int i = 0; i < randomChars; i++) {
-            int chIndex = RNG.nextInt(CHARS.length());
-            char ch = CHARS.charAt(chIndex);
+    public String nextName() {
+        // pid (1~64bit) + counter (32bit) + random (8bit)
+        BigInteger socketId = BigInteger
+                .valueOf(pidOrRandom())
+                .shiftLeft(32)
+                .or(BigInteger.valueOf(counter.getAndIncrement()))
+                .shiftLeft(8)
+                .or(BigInteger.valueOf(RNG.nextInt(1<<8)));
 
-            // if chosen character is a letter, decide if it should be uppercase or not
-            if (chIndex >= 12 && RNG.nextBoolean()) {
-                ch = Character.toUpperCase(ch);
-            }
-
-            sb.append(ch);
-        }
-        return sb.toString();
+        return PREFIX + socketId.toString(36);
     }
 
-    public static String nextUniqueName() {
-        return nextName(11);
+    public long pidOrRandom() {
+        return pid != 0 ? pid : RNG.nextLong();
     }
 }
