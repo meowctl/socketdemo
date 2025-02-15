@@ -4,9 +4,9 @@ import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SocketName {
-    private static final String PREFIX = "gbru-";
+    private static final String PREFIX = "gabiru-";
     private static final int TIMESTAMP_BITS = 41;
-    private static final int COUNTER_BITS = 19;
+    private static final int COUNTER_BITS = 16;
     private static final long TIMESTAMP_MAX_VALUE = (1L << TIMESTAMP_BITS) - 1;
     private static final int COUNTER_MAX_VALUE = (1 << COUNTER_BITS) - 1;
 
