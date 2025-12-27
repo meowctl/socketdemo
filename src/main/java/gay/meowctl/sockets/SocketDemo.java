@@ -57,7 +57,9 @@ public class SocketDemo {
         var mainThread = Thread.currentThread();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.err.println("exiting ...");
+            if (mainThread.isAlive()) {
+                System.err.println("exiting ...");
+            }
 
             mainThread.interrupt();
             try {
