@@ -23,7 +23,8 @@ public class SocketDemo {
     }
 
     public static void main(String[] args) throws IOException {
-        setShutdownHook();
+        Thread shutdownHook = newShutdownHook();
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
 
         boolean isUnix = false;
 
@@ -51,15 +52,26 @@ public class SocketDemo {
                 throw e;
             }
         }
+
+        // remove shutdown hook as to not print "exiting ..." message when program terminates normally
+        try {
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        } catch (IllegalStateException ignored) {}
     }
 
-    private static void setShutdownHook() {
+    private static Thread newShutdownHook() {
         var mainThread = Thread.currentThread();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        return new Thread(() -> {
             System.err.println("exiting ...");
+
             mainThread.interrupt();
-        }));
+            try {
+                mainThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public void printTcpSocket() throws IOException {
