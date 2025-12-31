@@ -1,6 +1,6 @@
 package gay.meowctl.sockets;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetAddress;
@@ -11,7 +11,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -97,9 +96,12 @@ public class SocketDemo {
         System.out.println(socket.getLocalAddress());
 
         try (SocketChannel conn = socket.accept();
-             var reader = new BufferedReader(Channels.newReader(conn, StandardCharsets.UTF_8))) {
-
-            reader.lines().forEach(System.out::println);
+             var inputStream = new BufferedInputStream(Channels.newInputStream(conn))) {
+            int len;
+            byte[] buf = new byte[16384];
+            while ((len = inputStream.read(buf)) != -1) {
+                System.out.write(buf, 0, len);
+            }
         }
     }
 }
