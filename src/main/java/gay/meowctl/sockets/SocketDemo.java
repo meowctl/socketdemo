@@ -1,7 +1,7 @@
 package gay.meowctl.sockets;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -96,7 +96,7 @@ public class SocketDemo {
         System.out.println(socket.getLocalAddress());
 
         try (SocketChannel conn = socket.accept();
-             var inputStream = new BufferedInputStream(Channels.newInputStream(conn))) {
+             InputStream inputStream = Channels.newInputStream(conn)) {
             int len;
             byte[] buf = new byte[16384];
             while ((len = inputStream.read(buf)) != -1) {
